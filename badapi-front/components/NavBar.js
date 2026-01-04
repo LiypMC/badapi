@@ -19,14 +19,17 @@ const links = [
 export default function NavBar() {
   const pathname = usePathname();
   const [loggedIn, setLoggedIn] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     setLoggedIn(!!getSessionToken());
+    setOpen(false);
   }, [pathname]);
 
   const handleLogout = () => {
     clearAuth();
     setLoggedIn(false);
+    setOpen(false);
   };
 
   return (
@@ -36,7 +39,21 @@ export default function NavBar() {
           <span className="logo-dot" />
           <span>BadAPI</span>
         </div>
-        <div className="nav-links">
+        <button className="nav-toggle" type="button" onClick={() => setOpen(!open)}>
+          <span />
+          <span />
+          <span />
+        </button>
+        <div className={`nav-links ${open ? "open" : ""}`}>
+          <div className="nav-links-header">
+            <span className="logo">
+              <span className="logo-dot" />
+              <span>BadAPI</span>
+            </span>
+            <button className="nav-close" type="button" onClick={() => setOpen(false)}>
+              ×
+            </button>
+          </div>
           {links.map((link) => (
             <Link
               key={link.href}

@@ -56,6 +56,8 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .nav {
@@ -125,6 +127,43 @@ textarea {
   font-size: 0.85rem;
 }
 
+.nav-toggle {
+  display: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--ink);
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.nav-toggle span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--ink);
+}
+
+.nav-close {
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.nav-links-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 12px;
+}
+
 .section {
   display: grid;
   gap: 24px;
@@ -135,6 +174,7 @@ textarea {
   border: 1px solid var(--border);
   border-radius: 18px;
   box-shadow: var(--shadow);
+  max-width: 100%;
 }
 
 .glass-strong {
@@ -243,6 +283,7 @@ textarea {
 .docs-content {
   display: grid;
   gap: 24px;
+  min-width: 0;
 }
 
 .docs-card {
@@ -266,6 +307,8 @@ textarea {
   font-size: 0.85rem;
   line-height: 1.5;
   white-space: pre-wrap;
+  overflow-x: auto;
+  overflow-wrap: anywhere;
 }
 
 .btn {
@@ -309,12 +352,14 @@ textarea {
 .mono {
   font-family: "JetBrains Mono", monospace;
   font-size: 0.9rem;
+  overflow-wrap: anywhere;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.95rem;
+  table-layout: fixed;
 }
 
 .table th,
@@ -322,6 +367,7 @@ textarea {
   padding: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   text-align: left;
+  overflow-wrap: anywhere;
 }
 
 .badge {
@@ -339,6 +385,7 @@ textarea {
   border: 1px solid rgba(255, 106, 140, 0.4);
   background: rgba(255, 106, 140, 0.1);
   color: #ffd6de;
+  overflow-wrap: anywhere;
 }
 
 .success {
@@ -389,6 +436,7 @@ textarea {
   border-radius: 20px;
   padding: 26px;
   box-shadow: var(--shadow);
+  max-width: 100%;
 }
 
 .feature-window {
@@ -549,15 +597,136 @@ textarea {
   .docs-sidebar {
     position: static;
   }
+
+  .docs-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 768px) {
   .page {
-    padding: 80px 6vw 60px;
+    padding: 86px 5.5vw 56px;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .split {
+    grid-template-columns: 1fr;
+  }
+
+  .floating-strip {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .table th,
+  .table td {
+    white-space: normal;
+  }
+
+  .table th,
+  .table td {
+    white-space: nowrap;
   }
 
   .footer {
     flex-direction: column;
     gap: 12px;
+  }
+
+  .nav-inner {
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .nav-toggle {
+    display: inline-flex;
+    position: absolute;
+    right: 16px;
+    top: 12px;
+  }
+
+  .nav-links {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: min(300px, 80vw);
+    background: var(--panel-strong);
+    padding: 24px;
+    flex-direction: column;
+    align-items: flex-start;
+    transform: translateX(110%);
+    transition: transform 0.25s ease;
+    z-index: 20;
+  }
+
+  .nav-links.open {
+    transform: translateX(0);
+  }
+
+  .nav-links-header {
+    display: flex;
+    width: 100%;
+  }
+
+  .logo {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    gap: 28px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 1.6rem + 2vw, 2.6rem);
+  }
+
+  .hero p {
+    font-size: 1rem;
+  }
+
+  .panel,
+  .glass,
+  .glass-strong,
+  .docs-card {
+    padding: 20px;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn,
+  .btn.secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .docs-sidebar {
+    padding: 16px;
+  }
+
+  .docs-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .codeblock {
+    font-size: 0.8rem;
+  }
+
+  .floating-strip {
+    padding: 14px 16px;
   }
 }
