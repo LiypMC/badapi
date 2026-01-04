@@ -1,6 +1,5 @@
 .env
 *.env
 .env.*
-badapi-front/
-**/badapi-front/
+badapi-front/node_modules/
 
