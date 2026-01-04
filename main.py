@@ -3,6 +3,7 @@ import importlib.util
 import time
 import json
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from authbadapi import router as auth_router
 from upload import router as upload_router
 from analysis import router as analysis_router  # ← ADD THIS
@@ -30,6 +31,18 @@ request_logs_module = _load_request_logs_module()
 request_logs_router = request_logs_module.router
 
 app = FastAPI(title="BadAPI 😈")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://badapis.axionslab.com"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 @app.middleware("http")
 async def log_authenticated_requests(request: Request, call_next):
