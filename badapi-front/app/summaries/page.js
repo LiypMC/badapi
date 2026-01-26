@@ -3,23 +3,47 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { request } from "../../lib/api";
-import { getApiKey } from "../../lib/storage";
+import { getApiKey, getApiKeys, saveApiKey, setApiKey } from "../../lib/storage";
+import MarkdownView from "../../components/MarkdownView";
 
 export default function SummariesPage() {
   const [apiKey, setApiKeyState] = useState("");
+  const [savedKeys, setSavedKeys] = useState([]);
+  const [newKey, setNewKey] = useState("");
   const [uploads, setUploads] = useState([]);
   const [summaries, setSummaries] = useState([]);
   const [fileId, setFileId] = useState("");
   const [selectedSummary, setSelectedSummary] = useState(null);
+  const [query, setQuery] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setApiKeyState(getApiKey());
+    setSavedKeys(getApiKeys());
   }, []);
 
   const authHeader = () => ({ Authorization: `Bearer ${apiKey}` });
+
+  const handleSaveKey = () => {
+    if (!newKey) return;
+    const entry = {
+      raw: newKey,
+      label: "Imported key",
+      last4: newKey.slice(-4),
+      savedAt: new Date().toISOString()
+    };
+    setSavedKeys(saveApiKey(entry));
+    setApiKey(newKey);
+    setApiKeyState(newKey);
+    setNewKey("");
+  };
+
+  const handleSelectKey = (value) => {
+    setApiKeyState(value);
+    setApiKey(value);
+  };
 
   const loadUploads = async () => {
     try {
@@ -84,16 +108,41 @@ export default function SummariesPage() {
     }
   };
 
+  const filteredSummaries = summaries.filter((summary) =>
+    `${summary.filename} ${summary.model}`.toLowerCase().includes(query.toLowerCase())
+  );
+
   return (
     <section className="section">
       <div className="panel">
         <h2>AI Summaries</h2>
-        <p className="muted">Uses your API key for AI summary requests.</p>
+        <p className="muted">Pick an API key and generate a summary from an upload.</p>
         {!apiKey && (
           <div className="alert">
-            No API key yet. <Link href="/keys">Create or paste one</Link>.
+            No active API key. <Link href="/keys">Create or paste one</Link>.
           </div>
         )}
+        <div className="form">
+          <select className="select" value={apiKey} onChange={(event) => handleSelectKey(event.target.value)}>
+            <option value="">Select saved API key</option>
+            {savedKeys.map((key) => (
+              <option key={key.raw} value={key.raw}>
+                {key.label || "Key"} • {key.last4}
+              </option>
+            ))}
+          </select>
+          <div className="inline">
+            <input
+              className="input mono"
+              placeholder="Paste API key"
+              value={newKey}
+              onChange={(event) => setNewKey(event.target.value)}
+            />
+            <button className="btn secondary" type="button" onClick={handleSaveKey}>
+              Save
+            </button>
+          </div>
+        </div>
         <form className="form" onSubmit={handleSummarize}>
           <select className="select" value={fileId} onChange={(event) => setFileId(event.target.value)}>
             <option value="">Select upload</option>
@@ -113,6 +162,12 @@ export default function SummariesPage() {
 
       <div className="panel">
         <h3>Recent Summaries</h3>
+        <input
+          className="input"
+          placeholder="Search summaries"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
         <table className="table">
           <thead>
             <tr>
@@ -124,7 +179,7 @@ export default function SummariesPage() {
             </tr>
           </thead>
           <tbody>
-            {summaries.map((summary) => (
+            {filteredSummaries.map((summary) => (
               <tr key={summary.summary_id}>
                 <td>{summary.filename}</td>
                 <td>{summary.model}</td>
@@ -141,7 +196,7 @@ export default function SummariesPage() {
                 </td>
               </tr>
             ))}
-            {!summaries.length && (
+            {!filteredSummaries.length && (
               <tr>
                 <td colSpan="5" className="muted">
                   No summaries yet.
@@ -158,7 +213,7 @@ export default function SummariesPage() {
           <p className="muted">
             {selectedSummary.filename} • {selectedSummary.model}
           </p>
-          <pre className="codeblock">{selectedSummary.summary}</pre>
+          <MarkdownView content={selectedSummary.summary} />
         </div>
       )}
     </section>

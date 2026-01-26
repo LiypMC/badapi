@@ -119,6 +119,15 @@ def root():
         "docs": "/docs"
     }
 
+    #make a /ping endpoint that returns {"message": "pong"}
+
+
+
+@app.get("/ping", tags=["Health"])
+def ping():
+    //Add more to the /ping endpoint
+    return {"message": "pong"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)

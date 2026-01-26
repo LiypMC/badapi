@@ -7,13 +7,12 @@ import { clearAuth, getSessionToken } from "../lib/storage";
 
 const links = [
   { href: "/", label: "Home" },
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/auth", label: "Login" },
   { href: "/keys", label: "API Keys" },
   { href: "/files", label: "Files" },
   { href: "/summaries", label: "Summaries" },
-  { href: "/docs", label: "Docs" },
-  { href: "/profile", label: "Profile" },
-  { href: "/terms", label: "Terms" }
+  { href: "/docs", label: "Docs" }
 ];
 
 export default function NavBar() {

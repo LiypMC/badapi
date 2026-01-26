@@ -298,6 +298,21 @@ def get_current_jwt_user(request: Request, authorization: str = Header(None)):
 
     return user
 
+#make a /protected_api that will list all the api
+#just added some fun code to make it nice
+@router.get("protected_api")
+def protected_api(
+    request: Request
+    response: Response
+
+    user=Depends(get_current_user)
+):
+    from rate_limiter import require_general_limit
+    require_general_limit(require_general_limit, response, user)
+    return {
+            "message": f"You came here yahhhhhh!!!!!, okay {user['username']}, lets try to create you first api key! Why don't we try to go to /docs"
+            "message": f"You might not like it there because everything is formal but {user['username]}, i will be with you!!! not in the sure face \n so lets fly to /docs"
+            }
 # Protected Route
 @router.get("/protected")
 def protected(
@@ -308,5 +323,5 @@ def protected(
     from rate_limiter import require_general_limit
     require_general_limit(request, response, user)
     return {
-        "message": f"Hello {user['username']}, you have access."
+        "message": f"Hello {user['username']}, you have access. let's try something here..... uhhh lets go to /... what was it \n oh yeah.. /protected_api... uh trust me it not what you think it is"
     }

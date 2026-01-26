@@ -3,17 +3,21 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { request } from "../../lib/api";
-import { getApiKey, setApiKey } from "../../lib/storage";
+import { getApiKey, getApiKeys, saveApiKey, setApiKey } from "../../lib/storage";
 
 export default function FilesPage() {
   const [apiKey, setApiKeyState] = useState("");
+  const [savedKeys, setSavedKeys] = useState([]);
+  const [newKey, setNewKey] = useState("");
   const [uploads, setUploads] = useState([]);
+  const [query, setQuery] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setApiKeyState(getApiKey());
+    setSavedKeys(getApiKeys());
   }, []);
 
   const authHeader = () => ({ Authorization: `Bearer ${apiKey}` });
@@ -38,6 +42,26 @@ export default function FilesPage() {
     setApiKey(apiKey);
     setMessage("API key saved. Loading uploads...");
     loadUploads();
+  };
+
+  const handleSaveKey = () => {
+    if (!newKey) return;
+    const entry = {
+      raw: newKey,
+      label: "Imported key",
+      last4: newKey.slice(-4),
+      savedAt: new Date().toISOString()
+    };
+    setSavedKeys(saveApiKey(entry));
+    setApiKey(newKey);
+    setApiKeyState(newKey);
+    setNewKey("");
+    setMessage("API key saved.");
+  };
+
+  const handleSelectKey = (value) => {
+    setApiKeyState(value);
+    setApiKey(value);
   };
 
   const handleUpload = async (event) => {
@@ -110,6 +134,10 @@ export default function FilesPage() {
     }
   };
 
+  const filteredUploads = uploads.filter((upload) =>
+    `${upload.filename} ${upload.file_hash}`.toLowerCase().includes(query.toLowerCase())
+  );
+
   return (
     <section className="section">
       <div className="panel">
@@ -121,14 +149,27 @@ export default function FilesPage() {
           </div>
         )}
         <div className="form">
-          <input
-            className="input mono"
-            placeholder="API Key"
-            value={apiKey}
-            onChange={(event) => setApiKeyState(event.target.value)}
-          />
-          <button className="btn secondary" type="button" onClick={handleApiKeySave}>
-            Save API Key
+          <select className="select" value={apiKey} onChange={(event) => handleSelectKey(event.target.value)}>
+            <option value="">Select saved API key</option>
+            {savedKeys.map((key) => (
+              <option key={key.raw} value={key.raw}>
+                {key.label || "Key"} • {key.last4}
+              </option>
+            ))}
+          </select>
+          <div className="inline">
+            <input
+              className="input mono"
+              placeholder="Paste API key"
+              value={newKey}
+              onChange={(event) => setNewKey(event.target.value)}
+            />
+            <button className="btn secondary" type="button" onClick={handleSaveKey}>
+              Save
+            </button>
+          </div>
+          <button className="btn secondary" type="button" onClick={handleApiKeySave} disabled={!apiKey}>
+            Use Selected Key
           </button>
         </div>
       </div>
@@ -147,9 +188,17 @@ export default function FilesPage() {
 
       <div className="panel">
         <h3>Uploads</h3>
-        <button className="btn secondary" type="button" onClick={loadUploads} disabled={!apiKey}>
-          Refresh
-        </button>
+        <div className="row space">
+          <input
+            className="input"
+            placeholder="Search uploads"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+          <button className="btn secondary" type="button" onClick={loadUploads} disabled={!apiKey}>
+            Refresh
+          </button>
+        </div>
         <table className="table">
           <thead>
             <tr>
@@ -161,7 +210,7 @@ export default function FilesPage() {
             </tr>
           </thead>
           <tbody>
-            {uploads.map((upload) => (
+            {filteredUploads.map((upload) => (
               <tr key={upload.file_id}>
                 <td>{upload.filename}</td>
                 <td>{upload.row_count}</td>
@@ -179,7 +228,7 @@ export default function FilesPage() {
                 </td>
               </tr>
             ))}
-            {!uploads.length && (
+            {!filteredUploads.length && (
               <tr>
                 <td colSpan="5" className="muted">
                   No uploads yet.
